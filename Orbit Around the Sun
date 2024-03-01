@@ -1,0 +1,80 @@
+import turtle
+import math
+
+# Setup the screen
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.tracer(0)
+
+def new_planet(color, click_handler):
+  planet = turtle.Turtle()
+  planet.shape("circle")
+  planet.color(color)
+  planet.penup()
+  planet.onclick(click_handler)  # Bind the click event to the planet
+  return planet
+  
+# Define click event handlers for each planet
+def on_click_sun(x, y):
+    print("Sun Facts:")
+    print("The Sun is a star at the center of the Solar System.")
+    print("It is nearly a perfect sphere of hot plasma.")
+    print("It is by far the most important source of energy for life on Earth.")
+
+def on_click_mercury(x, y):
+    print("Mercury Facts:")
+    print("Mercury is the smallest planet in the Solar System.")
+    print("It is the closest planet to the Sun.")
+
+def on_click_venus(x, y):
+    print("Venus Facts:")
+    print("Venus is the second planet from the Sun.")
+    print("It is named after the Roman goddess of love and beauty.")
+    
+def on_click_earth(x, y):
+  print("Earth Facts: ")
+  print("Earth is estimated to be about 4.54 billion years old.")
+  print("About 71% of Earth's surface is covered with water.")
+
+#determine the new position as it rotates around the sun
+def move(planet, radius, angle):
+    new_angle = angle + 1  # Move the planet by 1 degree around the orbit
+    if new_angle >= 360:
+        new_angle = 0  # Reset the angle after a full rotation to avoid overflow
+    planet.goto(radius * math.sin(math.radians(new_angle)) + sun.xcor(), 
+                radius * math.cos(math.radians(new_angle)) + sun.ycor())
+    screen.update()
+    return new_angle
+  
+def animate():
+    global mercury_angle, venus_angle, earth_angle
+    mercury_angle = move(mercury, mercury_orbit, mercury_angle)
+    mercury.pendown()
+    venus_angle = move(venus, venus_orbit, venus_angle)
+    venus.pendown()
+    earth_angle = move(earth, earth_orbit, earth_angle)
+    earth.pendown()
+    screen.ontimer(animate, 10)  # Call the animate function every 50 milliseconds
+
+# Create the stationary circle (planet)
+sun = new_planet("yellow", on_click_sun)
+sun.penup()  # Don't draw when moving to the starting position
+sun.goto(0, 0)  # Move the planet to a specific location
+
+# Create the orbiting circle (mercury)
+mercury = new_planet("red", on_click_mercury)  # We don't want the moon to draw a line while moving
+mercury_angle = 0  # Starting angle
+mercury_orbit = 50
+
+# Create the orbiting circle (venus)
+venus = new_planet("pink", on_click_venus)
+venus_orbit = 90
+venus_angle = 90
+
+earth = new_planet("blue", on_click_earth)
+earth_orbit = 150
+earth_angle = 125
+
+animate()
+
+turtle.done()
