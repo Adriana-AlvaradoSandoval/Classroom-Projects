@@ -1,0 +1,86 @@
+import turtle
+from random import randint
+
+#create the speed for the default turtle 
+turtle.speed(15)
+turtle.penup()
+turtle.goto(-140, 140)
+
+#for loop to move our turtle on the race track -- 
+#draw parallel verticle lines with the numbers in front of it  
+#add in pendown(), backward(160), right(90)
+for step in range(14):
+  turtle.write(step, align='center')
+  turtle.right(90)
+  turtle.forward(10)
+  turtle.pendown()
+  turtle.forward(160)
+  turtle.penup()
+  turtle.backward(170)
+  turtle.left(90)
+  turtle.forward(20)
+
+#creating a finish line
+turtle.penup()
+turtle.color('green')
+turtle.goto(140, 140)
+turtle.pendown()
+turtle.right(90)
+turtle.forward(170)
+turtle.hideturtle()
+
+#create the new turtle ada
+ada = turtle.Turtle()
+ada.color('red')
+ada.shape('turtle')
+
+#set up at the starting line 
+ada.penup()
+ada.goto(-160, 100)
+ada.pendown()
+
+#create a new turtle bob and set him to the color blue 
+bob = turtle.Turtle()
+bob.color('blue')
+bob.shape('turtle')
+
+bob.penup()
+bob.goto(-160, 60)
+bob.pendown()
+
+charlie = turtle.Turtle()
+charlie.color('pink')
+charlie.shape('turtle')
+
+charlie.penup()
+charlie.goto(-160, 20)
+charlie.pendown()
+
+dave = turtle.Turtle()
+dave.color('purple')
+dave.shape('turtle')
+
+dave.penup()
+dave.goto(-160, -20)
+dave.pendown()
+
+#moving our turtles little by little
+for turn in range(100):
+  ada.forward(randint(1, 5))
+  bob.forward(randint(1, 5))
+  charlie.forward(randint(1, 5))
+  dave.forward(randint(1, 5))
+  
+  if (ada.xcor() >= 140):
+    print("Race Over! Ada is the winner!")
+    break
+  elif bob.xcor() >= 140:
+    print("Race Over! Bob won the race!")
+    break
+  elif charlie.xcor() >= 140:
+    print("Race Over! Charlie is the winner!")
+    break
+  elif dave.xcor() >= 140:
+    print("Race Over! Dave won!")
+    break
+    
