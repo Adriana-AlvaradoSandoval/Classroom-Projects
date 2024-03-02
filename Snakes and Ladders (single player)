@@ -1,0 +1,270 @@
+import random
+import turtle
+
+GRID = 400
+CELL = 40
+snakes = {
+  1: {'end': (-180, -180), 'length': 2, 'change': 19}, 
+  2: {'end': (55, -100), 'length': 5, 'change': 20},
+  3: {'end': (-145, -20), 'length': 2, 'change': 17},
+  4: {'end': (-65, 60), 'length': 5, 'change': 20},
+  5: {'end': (140, 140), 'length': 2, 'change': 3}
+}
+
+ladders = {
+  1: {'end': (172, -180), 'length': 12, 'change': 21},
+  2: {'end': (-108, -140), 'length': 4, 'change': 5},
+  3: {'end': (92, 60), 'length': 4, 'change': 5},
+  4: {'end': (-28, -60), 'length': 8, 'change': 20},
+  5: {'end': (-148, 140), 'length': 4, 'change': 17},
+}
+
+
+# Function to draw grid
+def draw_grid():
+  turtle.penup()
+  turtle.goto(-200, -200)
+  turtle.pendown()
+  turtle.color("black")
+
+  # Draw vertical lines
+  for _ in range(10):
+    turtle.forward(GRID)
+    turtle.backward(GRID)
+    turtle.left(90)
+    turtle.penup()
+    turtle.forward(CELL)
+    turtle.right(90)
+    turtle.pendown()
+
+  turtle.forward(GRID)
+  turtle.right(90)
+
+  # Draw horizontal lines
+  for _ in range(5):
+    turtle.forward(GRID)
+    turtle.right(90)
+    turtle.penup()
+    turtle.forward(CELL)
+    turtle.right(90)
+    turtle.pendown()
+    turtle.forward(GRID)
+    turtle.left(90)
+    turtle.penup()
+    turtle.forward(CELL)
+    turtle.left(90)
+    turtle.pendown()
+    
+  turtle.forward(GRID)
+
+#draw the snakes 
+def draw_snake():
+  global snakes
+  s = turtle.Turtle()
+  s.ht()
+  s.speed(0)
+  s.color("red")
+  s.pensize(3)
+  
+  for keys in snakes:
+    p1 = (snakes[keys]['end'])
+    s.penup()
+    s.goto(p1)
+    s.pendown()
+    length = snakes[keys]['length'] 
+    for _ in range(length):  # Adjust the range for the desired number of waves
+      s.circle(4, 180)
+      s.right(180)
+      s.circle(4, -180)
+      s.left(180)
+    p2 = s.position()
+    snakes[keys]['start'] = p2
+  
+def draw_ladder():
+  global ladders
+  l = turtle.Turtle()
+  l.ht()
+  l.speed(0)
+  l.color("green")
+  l.pensize(2)
+  
+  for key in ladders:
+    p1 = ladders[key]['end']
+    l.penup()
+    l.goto(p1)
+    l.pendown()
+    length = ladders[key]['length'] 
+    # Calculate total ladder height based on length and rung distance
+    total_height = length * 10
+
+    # Calculate the start position (top of the ladder) based on end position and total height
+    p2 = (p1[0], p1[1] + total_height)
+
+    # Draw the sides of the ladder
+    l.penup()
+    l.goto(p1)
+    l.pendown()
+    l.goto(p1[0], p2[1])  # Draw one side of the ladder
+    l.penup()
+        
+    l.goto(p1[0] + 15, p1[1])  # Move to the start of the other side
+    l.pendown()
+    l.goto(p1[0] + 15, p2[1])  # Draw the other side
+
+    # Draw the rungs of the ladder
+    for i in range(length + 1):
+      l.penup()
+      l.goto(p1[0], p1[1] + i * 10)
+      l.pendown()
+      l.goto(p1[0] + 15, p1[1] + i * 10)
+    ladders[key]['start'] = l.position()
+    
+def sliding(info, position):
+  #is he facing left or right? L = -1 R = 1
+  direction = get_direction(position)
+  turtle.left(90) if direction == -1 else turtle.right(90)
+  
+  newx, newy = info['end']
+  turtle.goto(newx, newy)
+  position -= info['change']
+
+  #find the updated position
+  direction = get_direction(position)
+  turtle.left(90) if direction == 1 else turtle.right(90)
+  
+  return position 
+  
+def climbing(info, position):
+  #is he facing left or right? L = -1 R = 1
+  direction = get_direction(position)
+  turtle.right(90) if direction == -1 else turtle.left(90)
+  
+  newx, newy = info['start']
+  turtle.goto(newx, newy)
+  position += info['change']
+
+  #find the updated position
+  if position % 10 == 9:
+    return position
+  else:  
+    direction = get_direction(position)
+    turtle.right(90) if direction == 1 else turtle.left(90)
+  return position
+    
+def on_snake(x, y, position):
+  for id, info in snakes.items():
+    start_coord = info['start']
+    x_close = abs(x - start_coord[0])
+    y_close = abs(y - start_coord[1]) 
+        
+    #check if the player landed near / on the snake 
+    if x_close <= 15 and y_close <= 15:
+      print("Oh no!You landed on a snake!")
+      new_position = sliding(info, position)
+      print("Move down " + str(info['change']) + " spaces!")
+      print("You are now on space " + str(new_position))
+      return new_position
+  return position
+
+def on_ladder(x, y, position):
+  for id, info in ladders.items():
+    start_coord = info['end']
+    x_close = abs(x - start_coord[0])
+    y_close = abs(y - start_coord[1]) 
+        
+    #check if the player landed near / on the snake 
+    if x_close <= 15 and y_close <= 15:
+      print("Hooray!You landed on a ladder!")
+      new_position = climbing(info, position)
+      print("Move up " + str(info['change']) + " spaces!")
+      print("You are now on space " + str(new_position))
+      return new_position
+  return player_position
+
+def get_direction(pos):
+  row = (pos) // 10
+  direction = 1 if row % 2 == 0 else -1
+  return direction
+
+def animate_movement(start_pos, end_pos):
+  start_row = (start_pos) // 10
+  
+  #determine the direction of the turtle
+  direction = get_direction(start_pos)
+    
+  while start_pos < end_pos:
+  
+    if start_pos % 10 == 9 and start_pos != end_pos:
+      # Move to the next row
+      if start_pos == 99:
+        turtle.forward(CELL)
+        start_row = 0
+        start_pos = 0
+        end_pos = end_pos % 10
+      else:
+        turtle.setheading(90)  # Turn up
+        turtle.forward(CELL)
+        start_row += 1
+        start_pos += 1
+        turtle.setheading(180) if start_row % 2 == 1 else turtle.setheading(0)
+        direction = get_direction(start_pos)
+    else:
+      turtle.forward(CELL)
+      start_pos+= 1
+      
+# Function to roll the dice
+def roll_dice():
+  return random.randint(1, 6)
+
+# Initialize Turtle
+turtle.speed(0)  # Set the turtle speed to the maximum (0)
+
+# Draw the board
+draw_grid()
+draw_ladder()
+draw_snake()
+turtle.setheading(0)
+
+# Main game loop
+turtle.penup()
+turtle.goto(-180, -180)
+turtle.color('purple')
+turtle.shape('turtle')
+turtle.setheading(0)
+turtle.speed(5)
+
+player_position = 0
+
+while True:
+  input("Press Enter to roll the dice.")
+    
+  dice_value = roll_dice()
+  print("You rolled a "+ str(dice_value))  
+  new_pos = player_position + dice_value
+  print("Move to " + str(new_pos))
+  animate_movement(player_position, new_pos)
+  player_position = new_pos
+  x, y = turtle.position()
+  player_position = on_snake(x, y, player_position)
+  player_position = on_ladder(x, y, player_position)
+    
+
+  if player_position > 99:
+    turtle.forward(CELL)
+    turtle.ht()
+    print("Looks like you overshot it! \nWomp Womp! ")
+    womp = new_pos % 99 - 1
+    print("Move to " + str(womp))
+    turtle.goto(-180, -180)
+    turtle.setheading(0)
+    turtle.speed(5)
+    turtle.st()
+
+    player_position = player_position % 100
+    animate_movement(0, player_position)
+        
+  if player_position == 99:
+    print("You win!")
+    break
+  print("")
+turtle.done()
